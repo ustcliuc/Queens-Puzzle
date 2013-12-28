@@ -1,0 +1,125 @@
+#include <stdlib.h>
+
+#include "BasicOperations.h"
+
+bool checkResult(const int *negative_diagonal_num, const int *positive_diagonal_num, const int N)
+{
+	for (int i = 0; i < 2*N-1; i++)
+	{
+		if (negative_diagonal_num[i] > 1 || positive_diagonal_num[i] > 1)
+			return false;
+	}
+	return true;
+}
+
+bool finalSearch(int *queens, int *negative_diagonal_num, int *positive_diagonal_num, const int N, const int k)
+{
+	for (int i = N-k; i < N; i++)
+	{
+		int search_times = 0;
+		int num_on_diagonal = 0;
+		while ((num_on_diagonal = negative_diagonal_num[i+queens[i]]+positive_diagonal_num[i-queens[i]+N-1]) > 2)
+		{
+			int j = rand()%N;
+			int temp = queens[i];
+			queens[i] = queens[j];
+			queens[j] = temp;
+			if (negative_diagonal_num[i+queens[i]]+positive_diagonal_num[i-queens[i]+N-1]+negative_diagonal_num[j+queens[j]]+positive_diagonal_num[j-queens[j]+N-1] > 0 
+				|| abs(i-j) == abs(queens[i]-queens[j]))
+			{
+				temp = queens[i];
+				queens[i] = queens[j];
+				queens[j] = temp;
+			}
+			else {
+				negative_diagonal_num[i+queens[j]]--;
+				positive_diagonal_num[i-queens[j]+N-1]--;
+				negative_diagonal_num[j+queens[i]]--;
+				positive_diagonal_num[j-queens[i]+N-1]--;
+				negative_diagonal_num[i+queens[i]]++;
+				positive_diagonal_num[i-queens[i]+N-1]++;
+				negative_diagonal_num[j+queens[j]]++;
+				positive_diagonal_num[j-queens[j]+N-1]++;
+			}
+			if (search_times == 7000)
+				return false;
+			search_times++;
+		}
+	}
+	return true;
+}
+
+int *minConflictsSearch(const int N)
+{
+	int *queens, *negative_diagonal_num, *positive_diagonal_num;
+	while (true)
+	{
+		int k = initQueens3(queens, negative_diagonal_num, positive_diagonal_num, N);
+		if (finalSearch(queens, negative_diagonal_num, positive_diagonal_num, N, k) == true)
+			break;
+		delete queens;
+		delete negative_diagonal_num;
+		delete positive_diagonal_num;
+	}
+	delete negative_diagonal_num;
+	delete positive_diagonal_num;
+	return queens;
+}
+
+////找到一种交换方式使局部冲突数最少，返回最小冲突数
+////Find a switch plan to minimize the number of conflictions locally and return the new number of conflictions
+//int minimizeConflictionsLocally(int *queens, const int N, const int row)
+//{
+//	int num_conflictions = countConflictions(queens, N);
+//	if(num_conflictions == 0)
+//		return 0;
+//	int new_col = -1;
+//	int temp = queens[row];
+//	for (int j = 0; j < N; j++)
+//	{
+//		if (j == temp)
+//			continue;
+//		queens[row] = j;
+//		int new_num_conflictions = countConflictions(queens, N);
+//		if(new_num_conflictions <= num_conflictions){
+//			num_conflictions = new_num_conflictions;
+//			new_col = j;
+//		}
+//		queens[row] = temp;
+//	}
+//	if (new_col == -1)
+//		return -1;
+//
+//	queens[row] = new_col;
+//	return num_conflictions;
+//}
+//
+////最小冲突局部搜索
+////Use Min Conflicts method to search for a solution
+//int *MinConflictsSearch(int N)
+//{
+//	int *queens;
+//	int min;
+//	int row;
+//	while (true)
+//	{
+//		queens = initQueens2(N);
+//		int no_adjustment_times = 0;
+//		while (true)
+//		{
+//			row = rand()%N;	//随机选择一列/Choose a row randomly
+//			min = minimizeConflictionsLocally(queens, N, row);
+//			if (min == 0)
+//				return queens;
+//			else if (min == -1)
+//				no_adjustment_times++;
+//			else
+//				no_adjustment_times = 0;
+//
+//			if (no_adjustment_times > (N*N/2))
+//				break;
+//		}
+//		delete queens;
+//	}
+//	return NULL;
+//}
